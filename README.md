@@ -49,16 +49,57 @@ bun ./server.ts
   - **`source`**（必填）：远程 URL 或本地 JSON 路径
   - **`typeName`**（可选）：根类型名，需为合法标识符；默认 `GeneratedRoot`
 
-## 在 Cursor 中配置
+## MCP 配置：`.mcp.json`
 
-在 Cursor 的 MCP 设置里新增一项，将 **`command`** 设为上文任选一种对应的命令，`cwd` 设为克隆本仓库后的根目录。
-
-示例（Swagger 模式）：
+仓库根目录提供 **`.mcp.json`**，使用 MCP 常见的 **`mcpServers`** 结构，通过 STDIO 启动上述两种入口（服务名与下表一致）。
 
 ```json
 {
   "mcpServers": {
-    "swagger-json-to-ts": {
+    "swagger-openapi-to-ts": {
+      "command": "bun",
+      "args": ["src/index.ts"],
+      "cwd": "${workspaceFolder}"
+    },
+    "json-sample-to-ts": {
+      "command": "bun",
+      "args": ["server.ts"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
+
+### 在 Cursor 中使用
+
+1. 用 Cursor **打开本仓库根目录**（作为工作区），保证 **`${workspaceFolder}`** 能解析到项目根。
+2. **项目级 MCP** 通常放在 **`.cursor/mcp.json`**：可将根目录的 **`.mcp.json` 全文复制**到该路径，或在 MCP 设置中从文件导入。
+3. 修改配置后**重启 Cursor** 或重载 MCP，在工具列表中应能看到两个服务端下的 **`json-to-ts`**（可同时启用，注意名称区分）。
+4. 本机需已安装 **Bun**，且终端中能执行 `bun`。
+
+若 `${workspaceFolder}` 在你当前版本未被替换，将每项里的 **`cwd`** 改为你本机仓库的**绝对路径**，并把 **`args`** 改成该入口脚本的绝对路径。
+
+### 使用打包产物（可选）
+
+先执行 `pnpm run build:mcp` 生成 `dist/mcp-swagger`，再在 `mcpServers` 中增加例如：
+
+```json
+"swagger-openapi-to-ts-dist": {
+  "command": "${workspaceFolder}/dist/mcp-swagger",
+  "cwd": "${workspaceFolder}"
+}
+```
+
+仅在有 **`dist/mcp-swagger`** 时启用，否则进程会启动失败。
+
+### 手动配置（绝对路径示例）
+
+不依赖 `.mcp.json` 时，可在 Cursor 全局或项目 MCP 中自行添加，例如 Swagger 模式：
+
+```json
+{
+  "mcpServers": {
+    "swagger-openapi-to-ts": {
       "command": "bun",
       "args": ["/绝对路径/node_mcp_swagger/src/index.ts"],
       "cwd": "/绝对路径/node_mcp_swagger"
@@ -67,7 +108,7 @@ bun ./server.ts
 }
 ```
 
-将 `/绝对路径/node_mcp_swagger` 换成你本机的项目路径。若使用通用 JSON 模式，把 `args` 改为 `["/绝对路径/node_mcp_swagger/server.ts"]` 即可。
+将 `/绝对路径/node_mcp_swagger` 换成本机路径；通用 JSON 模式将 `args` 改为 `["/绝对路径/node_mcp_swagger/server.ts"]`。
 
 ## npm 脚本
 

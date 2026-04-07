@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "swagger-openapi-to-ts": {
+      "command": "bun",
+      "args": ["src/index.ts"],
+      "cwd": "${workspaceFolder}"
+    },
+    "json-sample-to-ts": {
+      "command": "bun",
+      "args": ["server.ts"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
